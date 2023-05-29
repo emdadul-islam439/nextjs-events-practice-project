@@ -1,38 +1,49 @@
 import { useRouter } from "next/router";
+import EventList from "../../../components/events/event-list";
 
-import dummy_events from "../../../data/dummy_data";
+import { getFilteredEvents } from "../../../data/dummy-data";
 
 function EventsWithSlugPage() {
   const router = useRouter();
   console.log(router.pathname);
   console.log(router.query);
-  // const id = router.query["some-id"];
-  const slugArr = router.query["slug"];
+
+  const slugArr = router.query.slug;
   console.log(slugArr);
-//   const date = slugArr[0];
-//   console.log(date);
-//   const is_true = slug_arr[1] === "true";
-  // let is_found = false;
+
+  if (!slugArr) {
+    return <p className="center">Loading...</p>;
+  }
+
+  const filteredYear = slugArr[0];
+  const filteredMonth = slugArr[1];
+
+  const numYear = +filteredYear;
+  const numMonth = +filteredMonth;
+
+  if (
+    isNaN(numYear) ||
+    isNaN(numMonth) ||
+    numYear < 2021 ||
+    numYear > 2030 ||
+    numMonth > 12 ||
+    numMonth < 1
+  ) {
+    return <p>Invalid filter. Please adjust your values!</p>;
+  }
+
+  const filteredEvents = getFilteredEvents({
+    year: numYear,
+    month: numMonth,
+  });
+
+  if (!filteredEvents || filteredEvents.length === 0) {
+    return <p>No events found for the chosen filter!</p>;
+  }
 
   return (
     <div>
-      <h1>Events With SLUG Page</h1>
-      {/* <ul>
-        {dummy_events.map((event) => {
-          if (event.date === date && event.featured === is_true) {
-            is_found = true;
-            return (
-              <li key={event.title}>
-                {`title: ${event.title}`} <br />
-                {`description: ${event.description}`} <br />
-                {`image: ${event.image}`} <br />
-                {`is_featured: ${event.featured}`}
-              </li>
-            );
-          }
-        })}
-        {!is_found && <h6>{"Could not found any item!"}</h6>}
-      </ul> */}
+      <EventList items={filteredEvents} />
     </div>
   );
 }
