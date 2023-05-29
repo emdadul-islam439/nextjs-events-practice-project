@@ -3,11 +3,11 @@ import { getAllEvents } from "../../data/dummy-data";
 // import dummy_events from "../../data/dummy_data";
 
 function EventsPage() {
-//   const dummy_events = dummy_events();
+  const allEvents = getAllEvents();
   return (
     <div>
       <h1>Events Page</h1>
-      <EventList items={getAllEvents()} />
+      <EventList items={allEvents} />
     </div>
   );
 }
