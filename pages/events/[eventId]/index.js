@@ -5,7 +5,11 @@ import EventContent from "../../../components/event-detail/event-content";
 import EventLogistics from "../../../components/event-detail/event-logistics";
 import EventSummary from "../../../components/event-detail/event-summary";
 import ErrorAlert from "../../../components/events/error-alert";
-import { getAllEvents, getEventById } from "../../../data/helper";
+import {
+  getAllEvents,
+  getEventById,
+  getFeaturedEvents,
+} from "../../../data/helper";
 
 function EventWithIdPage(props) {
   const [filteredEvent, setFilteredEvent] = useState(props.filteredEvent);
@@ -45,16 +49,10 @@ function EventWithIdPage(props) {
   }, []);
 
   if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!filteredEvent) {
     return (
-      <Fragment>
-        <ErrorAlert>
-          <p>No event found!</p>
-        </ErrorAlert>
-      </Fragment>
+      <div className="center">
+        <p>Loading...</p>
+      </div>
     );
   }
 
@@ -80,19 +78,24 @@ export async function getStaticProps(context) {
   const params = context.params;
   const eventId = params.eventId;
   const event = await getEventById(eventId);
-
+  if (!event) {
+    return {
+      notFound: true,
+    };
+  }
   return {
     props: {
       filteredEvent: event,
     },
+    revalidate: 30,
   };
 }
 
 export async function getStaticPaths() {
-  const allEvents = await getAllEvents();
+  const allEvents = await getFeaturedEvents();
   const paths = allEvents.map((event) => ({ params: { eventId: event.id } }));
   return {
     paths: paths,
-    fallback: false,
+    fallback: "blocking",
   };
 }
