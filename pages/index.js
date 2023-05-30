@@ -53,7 +53,7 @@ function HomePage(props) {
 export default HomePage;
 
 export async function getStaticProps(context) {
-  const featuredEvents = await getFeaturedEvents()
+  const featuredEvents = await getFeaturedEvents();
   return {
     props: {
       featuredEvents: featuredEvents,
