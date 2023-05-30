@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import EventList from "../components/events/event-list";
+import { getFeaturedEvents } from "../data/helper";
 
-function HomePage() {
-  const [featuredEvents, setFeaturedEvents] = useState([]);
+function HomePage(props) {
+  const [featuredEvents, setFeaturedEvents] = useState(props.featuredEvents);
   const [isLoading, setIsLoading] = useState(false);
 
   function getFeaturedEvents(eventList) {
@@ -50,3 +51,13 @@ function HomePage() {
 }
 
 export default HomePage;
+
+export async function getStaticProps(context) {
+  const featuredEvents = await getFeaturedEvents()
+  return {
+    props: {
+      featuredEvents: featuredEvents,
+    },
+    revalidate: 600, //600 seconds
+  };
+}
