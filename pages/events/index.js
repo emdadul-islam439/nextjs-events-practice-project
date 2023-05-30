@@ -7,39 +7,11 @@ import { getAllEvents } from "../../data/helper";
 
 function EventsPage(props) {
   const router = useRouter();
-  const [allEvents, setAllEvents] = useState(props.allEvents);
-  const [isLoading, setIsLoading] = useState(false);
+  const allEvents = props.allEvents;
 
   function findEventHandler(year, month) {
     const fullPath = `/events/${year}/${month}`;
     router.push(fullPath);
-  }
-
-  useEffect(() => {
-    setIsLoading(true);
-    fetch("https://nextjs-course-dcbca-default-rtdb.firebaseio.com/events.json")
-      .then((response) => response.json())
-      .then((data) => {
-        const eventList = [];
-        for (const key in data) {
-          eventList.push({
-            id: key,
-            title: data[key].title,
-            description: data[key].description,
-            location: data[key].location,
-            date: data[key].date,
-            image: data[key].image,
-            isFeatured: data[key].isFeatured,
-          });
-        }
-
-        setIsLoading(false);
-        setAllEvents(eventList);
-      });
-  }, []);
-
-  if (isLoading) {
-    return <p>Loading...</p>;
   }
 
   return (

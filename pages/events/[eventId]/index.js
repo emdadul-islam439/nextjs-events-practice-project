@@ -12,49 +12,9 @@ import {
 } from "../../../data/helper";
 
 function EventWithIdPage(props) {
-  const [filteredEvent, setFilteredEvent] = useState(props.filteredEvent);
-  const [isLoading, setIsLoading] = useState(false);
+  const filteredEvent = props.filteredEvent;
   // console.log(router.pathname);
   // console.log(router.query);
-  const router = useRouter();
-  const eventId = router.query.eventId;
-
-  function getEventById(eventList, eventId) {
-    return eventList.find((event) => event.id === eventId);
-  }
-
-  useEffect(() => {
-    setIsLoading(true);
-
-    fetch("https://nextjs-course-dcbca-default-rtdb.firebaseio.com/events.json")
-      .then((response) => response.json())
-      .then((data) => {
-        const eventList = [];
-        for (const key in data) {
-          eventList.push({
-            id: key,
-            title: data[key].title,
-            description: data[key].description,
-            location: data[key].location,
-            date: data[key].date,
-            image: data[key].image,
-            isFeatured: data[key].isFeatured,
-          });
-        }
-
-        const eventById = getEventById(eventList, eventId);
-        setIsLoading(false);
-        setFilteredEvent(eventById);
-      });
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
 
   return (
     <Fragment>
