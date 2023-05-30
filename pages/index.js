@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import Head from "next/head";
+
 import EventList from "../components/events/event-list";
 import { getFeaturedEvents } from "../data/helper";
 
@@ -7,7 +8,10 @@ function HomePage(props) {
 
   return (
     <div>
-      <h1>Home Page</h1>
+      <Head>
+        <title>NextJs Events</title>
+        <meta name="description" content="Find a lot of events that will allow you to evolve..." />
+      </Head>
       <EventList items={featuredEvents} />
     </div>
   );
