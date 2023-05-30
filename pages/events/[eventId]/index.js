@@ -5,9 +5,10 @@ import EventContent from "../../../components/event-detail/event-content";
 import EventLogistics from "../../../components/event-detail/event-logistics";
 import EventSummary from "../../../components/event-detail/event-summary";
 import ErrorAlert from "../../../components/events/error-alert";
+import { getAllEvents, getEventById } from "../../../data/helper";
 
-function EventWithIdPage() {
-  const [filteredEvent, setFilteredEvent] = useState({});
+function EventWithIdPage(props) {
+  const [filteredEvent, setFilteredEvent] = useState(props.filteredEvent);
   const [isLoading, setIsLoading] = useState(false);
   // console.log(router.pathname);
   // console.log(router.query);
@@ -37,7 +38,7 @@ function EventWithIdPage() {
           });
         }
 
-        const eventById = getEventById(eventList);
+        const eventById = getEventById(eventList, eventId);
         setIsLoading(false);
         setFilteredEvent(eventById);
       });
@@ -74,3 +75,24 @@ function EventWithIdPage() {
 }
 
 export default EventWithIdPage;
+
+export async function getStaticProps(context) {
+  const params = context.params;
+  const eventId = params.eventId;
+  const event = await getEventById(eventId);
+
+  return {
+    props: {
+      filteredEvent: event,
+    },
+  };
+}
+
+export async function getStaticPaths() {
+  const allEvents = await getAllEvents();
+  const paths = allEvents.map((event) => ({ params: { eventId: event.id } }));
+  return {
+    paths: paths,
+    fallback: false,
+  };
+}
