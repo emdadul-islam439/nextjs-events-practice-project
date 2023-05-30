@@ -54,12 +54,7 @@ function EventsWithSlugPage(props) {
         for (const key in data) {
           events.push({
             id: key,
-            title: data[key].title,
-            description: data[key].description,
-            location: data[key].location,
-            date: data[key].date,
-            image: data[key].image,
-            isFeatured: data[key].isFeatured,
+            ...data[key],
           });
         }
 
