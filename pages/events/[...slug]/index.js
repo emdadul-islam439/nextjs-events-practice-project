@@ -1,29 +1,81 @@
 import { useRouter } from "next/router";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import EventList from "../../../components/events/event-list";
 import ResultsTitle from "../../../components/events/results-title";
 import ErrorAlert from "../../../components/events/error-alert";
 import Button from "../../../components/ui/button";
-import { getFilteredEvents } from "../../../data/dummy-data";
 
 function EventsWithSlugPage() {
   const router = useRouter();
-  console.log(router.pathname);
-  console.log(router.query);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [slugArr, setSlugArr] = useState([]);
+  const [numYear, setNumYear] = useState(-1);
+  const [numMonth, setNumMonth] = useState(-1);
+  // console.log(router.pathname);
+  // console.log(router.query);
 
-  const slugArr = router.query.slug;
-  console.log(slugArr);
+  function getYearAndMonth(slugArr) {
+    const filteredYear = slugArr[0];
+    const filteredMonth = slugArr[1];
 
-  if (!slugArr) {
-    return <p className="center">Loading...</p>;
+    const numYear = +filteredYear;
+    const numMonth = +filteredMonth;
+    return { year: numYear, month: numMonth };
   }
 
-  const filteredYear = slugArr[0];
-  const filteredMonth = slugArr[1];
+  function getFilteredEvents(events, dateFilter) {
+    const { year, month } = dateFilter;
+    let filteredEvents = events.filter((event) => {
+      const eventDate = new Date(event.date);
+      return (
+        eventDate.getFullYear() === year && eventDate.getMonth() === month - 1
+      );
+    });
+    return filteredEvents;
+  }
 
-  const numYear = +filteredYear;
-  const numMonth = +filteredMonth;
+  useEffect(() => {
+    setIsLoading(true);
+    setSlugArr(router.query.slug);
+    if (slugArr) {
+      const { year, month } = getYearAndMonth(slugArr);
+      setNumYear(year);
+      setNumMonth(month);
+    }
+
+    fetch("https://nextjs-course-dcbca-default-rtdb.firebaseio.com/events.json")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        const events = [];
+        for (const key in data) {
+          events.push({
+            id: key,
+            title: data[key].title,
+            description: data[key].description,
+            location: data[key].location,
+            date: data[key].date,
+            image: data[key].image,
+            isFeatured: data[key].isFeatured,
+          });
+        }
+
+        const dateFilter = {
+          year: numYear,
+          month: numMonth,
+        };
+        const filteredEvents = getFilteredEvents(events, dateFilter);
+
+        setIsLoading(false);
+        setFilteredEvents(filteredEvents);
+      });
+  }, []);
+
+  if (isLoading) {
+    return <p className="center">Loading...</p>;
+  }
 
   if (
     isNaN(numYear) ||
@@ -45,10 +97,9 @@ function EventsWithSlugPage() {
     );
   }
 
-  const filteredEvents = getFilteredEvents({
-    year: numYear,
-    month: numMonth,
-  });
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
 
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
