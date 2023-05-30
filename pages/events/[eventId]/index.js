@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { Fragment, useEffect, useState } from "react";
 
@@ -18,6 +19,10 @@ function EventWithIdPage(props) {
 
   return (
     <Fragment>
+      <Head>
+        <title>{filteredEvent.title}</title>
+        <meta name="description" content={filteredEvent.description} />
+      </Head>
       <EventSummary title={filteredEvent.title} />
       <EventLogistics
         date={filteredEvent.date}

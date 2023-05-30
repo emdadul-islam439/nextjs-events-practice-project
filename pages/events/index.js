@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import EventList from "../../components/events/event-list";
 import EvetntsSearch from "../../components/events/events-search";
 import { getAllEvents } from "../../data/helper";
+import Head from "next/head";
 
 function EventsPage(props) {
   const router = useRouter();
@@ -16,6 +17,13 @@ function EventsPage(props) {
 
   return (
     <Fragment>
+      <Head>
+        <title>All Events</title>
+        <meta
+          name="description"
+          content="All NextJs events that will attract you..."
+        />
+      </Head>
       <EvetntsSearch onSearch={findEventHandler} />
       <EventList items={allEvents} />
     </Fragment>
