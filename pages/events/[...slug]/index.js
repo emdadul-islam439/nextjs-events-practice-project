@@ -9,6 +9,7 @@ import Button from "../../../components/ui/button";
 import { getFilteredEvents } from "../../../data/helper";
 
 function EventsWithSlugPage(props) {
+  const [isLoading, setIsloading] = useState(true);
   const [loadedEvents, setLoadedEvents] = useState([]);
   const router = useRouter();
   const filterData = router.query.slug;
@@ -20,6 +21,7 @@ function EventsWithSlugPage(props) {
 
   console.log("data : " + data);
   useEffect(() => {
+    setIsloading(true);
     if (data) {
       const events = [];
       for (const key in data) {
@@ -29,10 +31,11 @@ function EventsWithSlugPage(props) {
         });
       }
       setLoadedEvents(events);
+      setIsloading(false);
     }
   }, [data]);
 
-  if (!loadedEvents || !filterData) {
+  if (!loadedEvents || !filterData || isLoading) {
     return <p className="center">Loading...</p>;
   }
 
