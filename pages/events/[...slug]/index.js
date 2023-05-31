@@ -7,6 +7,7 @@ import ResultsTitle from "../../../components/events/results-title";
 import ErrorAlert from "../../../components/events/error-alert";
 import Button from "../../../components/ui/button";
 import { getFilteredEvents } from "../../../data/helper";
+import Head from "next/head";
 
 function EventsWithSlugPage(props) {
   const [isLoading, setIsloading] = useState(true);
@@ -89,6 +90,13 @@ function EventsWithSlugPage(props) {
   const date = new Date(numYear, numMonth - 1);
   return (
     <Fragment>
+      <Head>
+        <title>Filtered Events</title>
+        <meta
+          name="description"
+          content={`All events for ${numMonth}/${numYear}`}
+        />
+      </Head>
       <ResultsTitle date={date} />
       <EventList items={filteredEvents} />
     </Fragment>
