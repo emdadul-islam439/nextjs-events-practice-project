@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { Fragment, useEffect, useState } from "react";
+import useSWR from "swr";
 
 import EventList from "../../../components/events/event-list";
 import ResultsTitle from "../../../components/events/results-title";
@@ -8,77 +9,47 @@ import Button from "../../../components/ui/button";
 import { getFilteredEvents } from "../../../data/helper";
 
 function EventsWithSlugPage(props) {
+  const [loadedEvents, setLoadedEvents] = useState([]);
   const router = useRouter();
-  const [filteredEvents, setFilteredEvents] = useState(props.filteredEvents);
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [slugArr, setSlugArr] = useState([]);
-  // const [numYear, setNumYear] = useState(-1);
-  // const [numMonth, setNumMonth] = useState(-1);
-  // // console.log(router.pathname);
-  // // console.log(router.query);
+  const filterData = router.query.slug;
 
-  // function getYearAndMonth(slugArr) {
-  //   const filteredYear = slugArr[0];
-  //   const filteredMonth = slugArr[1];
+  const { data, error } = useSWR(
+    "https://nextjs-course-dcbca-default-rtdb.firebaseio.com/events.json",
+    (url) => fetch(url).then((res) => res.json())
+  );
 
-  //   const numYear = +filteredYear;
-  //   const numMonth = +filteredMonth;
-  //   return { year: numYear, month: numMonth };
-  // }
+  console.log("data : " + data);
+  useEffect(() => {
+    if (data) {
+      const events = [];
+      for (const key in data) {
+        events.push({
+          id: key,
+          ...data[key],
+        });
+      }
+      setLoadedEvents(events);
+    }
+  }, [data]);
 
-  // function getFilteredEvents(events, dateFilter) {
-  //   const { year, month } = dateFilter;
-  //   let filteredEvents = events.filter((event) => {
-  //     const eventDate = new Date(event.date);
-  //     return (
-  //       eventDate.getFullYear() === year && eventDate.getMonth() === month - 1
-  //     );
-  //   });
-  //   return filteredEvents;
-  // }
+  if (!loadedEvents || !filterData) {
+    return <p className="center">Loading...</p>;
+  }
 
-  // useEffect(() => {
-  //   setIsLoading(true);
-  //   setSlugArr(router.query.slug);
-  //   if (slugArr) {
-  //     const { year, month } = getYearAndMonth(slugArr);
-  //     setNumYear(year);
-  //     setNumMonth(month);
-  //   }
+  const filteredYear = filterData[0];
+  const filteredMonth = filterData[1];
 
-  //   fetch("https://nextjs-course-dcbca-default-rtdb.firebaseio.com/events.json")
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       console.log(data);
-  //       const events = [];
-  //       for (const key in data) {
-  //         events.push({
-  //           id: key,
-  //           title: data[key].title,
-  //           description: data[key].description,
-  //           location: data[key].location,
-  //           date: data[key].date,
-  //           image: data[key].image,
-  //           isFeatured: data[key].isFeatured,
-  //         });
-  //       }
+  const numYear = +filteredYear;
+  const numMonth = +filteredMonth;
 
-  //       const dateFilter = {
-  //         year: numYear,
-  //         month: numMonth,
-  //       };
-  //       const filteredEvents = getFilteredEvents(events, dateFilter);
-
-  //       setIsLoading(false);
-  //       setFilteredEvents(filteredEvents);
-  //     });
-  // }, []);
-
-  // if (isLoading) {
-  //   return <p className="center">Loading...</p>;
-  // }
-
-  if (props.hasError) {
+  if (
+    isNaN(numYear) ||
+    isNaN(numMonth) ||
+    numYear < 2021 ||
+    numYear > 2030 ||
+    numMonth > 12 ||
+    numMonth < 1
+  ) {
     return (
       <Fragment>
         <ErrorAlert>
@@ -90,6 +61,14 @@ function EventsWithSlugPage(props) {
       </Fragment>
     );
   }
+
+  let filteredEvents = loadedEvents.filter((event) => {
+    const eventDate = new Date(event.date);
+    return (
+      eventDate.getFullYear() === numYear &&
+      eventDate.getMonth() === numMonth - 1
+    );
+  });
 
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
@@ -104,7 +83,7 @@ function EventsWithSlugPage(props) {
     );
   }
 
-  const date = new Date(props.date.year, props.date.month - 1);
+  const date = new Date(numYear, numMonth - 1);
   return (
     <Fragment>
       <ResultsTitle date={date} />
@@ -115,34 +94,34 @@ function EventsWithSlugPage(props) {
 
 export default EventsWithSlugPage;
 
-export async function getServerSideProps(context) {
-  const params = context.params;
-  const slugArr = params.slug;
-  const filteredYear = slugArr[0];
-  const filteredMonth = slugArr[1];
-  const numYear = +filteredYear;
-  const numMonth = +filteredMonth;
+// export async function getServerSideProps(context) {
+//   const params = context.params;
+//   const slugArr = params.slug;
+//   const filteredYear = slugArr[0];
+//   const filteredMonth = slugArr[1];
+//   const numYear = +filteredYear;
+//   const numMonth = +filteredMonth;
 
-  if (
-    isNaN(numYear) ||
-    isNaN(numMonth) ||
-    numYear < 2021 ||
-    numYear > 2030 ||
-    numMonth > 12 ||
-    numMonth < 1
-  ) {
-    return {
-      props: { hasError: true },
-    };
-  }
+//   if (
+//     isNaN(numYear) ||
+//     isNaN(numMonth) ||
+//     numYear < 2021 ||
+//     numYear > 2030 ||
+//     numMonth > 12 ||
+//     numMonth < 1
+//   ) {
+//     return {
+//       props: { hasError: true },
+//     };
+//   }
 
-  const dateFilter = { year: numYear, month: numMonth };
-  const filteredEvents = await getFilteredEvents(dateFilter);
+//   const dateFilter = { year: numYear, month: numMonth };
+//   const filteredEvents = await getFilteredEvents(dateFilter);
 
-  return {
-    props: {
-      filteredEvents: filteredEvents,
-      date: dateFilter,
-    },
-  };
-}
+//   return {
+//     props: {
+//       filteredEvents: filteredEvents,
+//       date: dateFilter,
+//     },
+//   };
+// }

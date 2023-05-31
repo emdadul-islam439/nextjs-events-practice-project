@@ -1,3 +1,5 @@
+import useSWR from "swr";
+
 export async function getAllEvents() {
   const response = await fetch(
     "https://nextjs-course-dcbca-default-rtdb.firebaseio.com/events.json"
@@ -26,7 +28,7 @@ export async function getEventById(id) {
 
 export async function getFilteredEvents(dateFilter) {
   const { year, month } = dateFilter;
-  const allEvents = await getAllEvents()
+  const allEvents = await getAllEvents();
 
   let filteredEvents = allEvents.filter((event) => {
     const eventDate = new Date(event.date);
